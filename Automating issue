@@ -1,0 +1,115 @@
+Automating Issue Management with Python Flask, AWS EC2, and JIRA
+Table of contents
+Motivation
+Project Architecture
+Implementation Details
+The Flask Application
+Deploying Flask App to AWS EC2
+Successful Creation of JIRA ticket
+Challenges and their Solutions
+Conclusion
+
+In this blog post, I will walk you through a project where I automated the issue management process for a GitHub repository.
+By using a combination of Python Flask, AWS EC2 instances, and JIRA, I created a seamless workflow where raising an issue on GitHub automatically creates a corresponding ticket on JIRA. 
+This integration not only streamlines our workflow but also ensures that no issue goes unnoticed.
+
+MotivationManaging issues across multiple platforms can be a daunting task, especially in fast-paced development environments. I noticed many teams often found it challenging to ensure that every issue raised on GitHub was promptly addressed and tracked in JIRA. This led to delays, overlooked tasks, and inefficiencies in our workflow. To address these challenges, I decided to automate the issue management process. By integrating GitHub with JIRA through a Python Flask application hosted on AWS EC2, we aimed to create a seamless, automated workflow that ensures every issue is tracked and managed effectively, allowing our developers to focus more on coding and less on administrative overhead.
+
+Project Architecture
+Here is a high-level overview of the project architecture:
+
+GitHub: When an issue is created, a web hook triggers an event.
+
+Flask App on AWS EC2: The web hook sends the event data to our Flask application hosted on an EC2 instance.
+
+JIRA: The Flask app processes the data and creates a new ticket in JIRA.
+
+Implementation Details
+The Flask Application
+
+Copy
+
+Copy
+from flask import Flask
+import requests
+from requests.auth import HTTPBasicAuth
+import json
+
+app = Flask(__name__)
+
+@app.route("/createJIRA", methods=['POST'])
+def createJIRA():
+    url = "https://your-atlassian-domain.atlassian.net/rest/api/3/issue"
+
+    API_TOKEN = "your-api-token"
+
+    auth = HTTPBasicAuth("email@gmail.com", API_TOKEN)
+
+    headers = {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+    }
+
+    payload = json.dumps( {
+    "fields": {
+        "description": {
+        "content": [
+            {
+            "content": [
+                {
+                "text": "My first Jira ticket",
+                "type": "text"
+                }
+            ],
+            "type": "paragraph"
+            }
+        ],
+        "type": "doc",
+        "version": 1
+        },
+        "issuetype": {
+        "id": "10005"
+        },
+        "project": {
+        "key": "JGPI"
+        },
+        "summary": "First Jira Ticket",
+    },
+    "update": {}
+    } )
+
+    response = requests.request(
+    "POST",
+    url,
+    data=payload,
+    headers=headers,
+    auth=auth
+    )
+
+    return json.dumps(json.loads(response.text), sort_keys=True, indent=4, separators=(",", ": "))
+
+app.run('0.0.0.0', port=5000)
+***Note:***Some details such as my atlassian domain, my email, and the API token are redacted for security reasons. All the other code is the same! You can simply replace the dummy text with your credentials to experience the same effect.
+
+Deploying Flask App to AWS EC2
+
+
+Successful Creation of JIRA ticket
+
+
+Challenges and their Solutions
+Throughout the implementation of this project, I encountered several challenges. One major hurdle was ensuring secure communication between GitHub, the Flask application, and JIRA, especially with sensitive data like API tokens. A solution for this problem would be using HTTPS protocols and using environment variables to keep the API tokens secure. Another challenge was handling different payload formats from GitHub's webhooks, which required robust error handling and payload validation in our Flask app. Additionally, setting up the Flask application on AWS EC2 and ensuring it was reliably up and running involved configuring proper firewall rules. By addressing these challenges with focused solutions, I ensured a secure, reliable, and efficient integration between GitHub and JIRA.
+
+Conclusion
+By integrating GitHub with JIRA using Python Flask and AWS EC2, we have automated the issue management process, making our workflow more efficient. This setup can be further extended and customized to fit various project requirements.
+
+For more awesome projects about DevOps technologies and want to know more about how DevOps makes this easier.
+
+
+
+
+
+
+Subscribe
+
+
